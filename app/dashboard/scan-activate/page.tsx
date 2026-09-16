@@ -28,14 +28,14 @@ export default function ScanActivatePage() {
           const pathSegments = url.pathname.split("/");
           const slug = pathSegments[pathSegments.length - 1];
           if (slug) {
-            scanner.clear();
+            scanner.clear().catch(() => {});
             router.push(`/dashboard?search=${slug}`);
           }
         } catch {
           if (decodedText.includes("muac-") || decodedText.length > 0) {
             const parts = decodedText.split("/");
             const slug = parts[parts.length - 1];
-            scanner.clear();
+            scanner.clear().catch(() => {});
             router.push(`/dashboard?search=${slug}`);
           } else {
             setErrorMsg("Código inválido.");
@@ -78,7 +78,7 @@ export default function ScanActivatePage() {
         </div>
 
         {/* Visor da Câmera */}
-        <div className="bg-zinc-900 border border-white/5 rel p-5 rounded-3xl shadow-xl space-y-4">
+        <div className="bg-zinc-900 border border-white/5 p-5 rounded-3xl shadow-xl space-y-4">
           <div id="reader" className="w-full overflow-hidden rounded-2xl bg-zinc-950 text-xs text-zinc-400" />
 
           {errorMsg && (
@@ -88,7 +88,7 @@ export default function ScanActivatePage() {
           )}
         </div>
 
-        {/* Entrada Manual Alternativa (Caso o navegador bloqueie a câmera por IP local) */}
+        {/* Entrada Manual Alternativa */}
         <div className="bg-zinc-900 border border-white/5 p-6 rounded-3xl shadow-xl space-y-4">
           <h2 className="text-sm font-bold text-zinc-300">Busca Rápida por Código / Slug</h2>
           <form onSubmit={handleManualSubmit} className="space-y-3">
