@@ -1,10 +1,9 @@
 import { NextResponse } from "next/server";
-import { db } from "../../../../src/db";
-import { qrCodes } from "../../../../src/db/schema";
+import { db } from "@/src/db";
+import { qrCodes } from "@/src/db/schema";
 import { eq, and } from "drizzle-orm";
 import { cookies } from "next/headers";
-import { decrypt } from "../../../../src/lib/session";
-
+import { decrypt } from "@/src/lib/session";
 type RouteParams = {
   params: Promise<{ id: string }>;
 };
