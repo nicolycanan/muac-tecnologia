@@ -1,0 +1,54 @@
+import "server-only";
+import { SignJWT, jwtVerify } from "jose";
+import { cookies } from "next/headers";
+
+const secretKey = process.env.SESSION_SECRET;
+const encodedKey = new TextEncoder().encode(secretKey);
+
+type SessionPayload = {
+  userId: string;
+  expiresAt: Date;
+};
+
+// Criptografa os dados para criar o token JWT
+export async function encrypt(payload: SessionPayload) {
+  return new SignJWT(payload)
+    .setProtectedHeader({ alg: "HS256" })
+    .setIssuedAt()
+    .setExpirationTime("7d")
+    .sign(encodedKey);
+}
+
+// Descriptografa e valida o token JWT
+export async function decrypt(session: string | undefined = "") {
+  try {
+    const { payload } = await jwtVerify(session, encodedKey, {
+      algorithms: ["HS256"],
+    });
+    return payload as SessionPayload;
+  } catch (error) {
+    return null;
+  }
+}
+
+// Cria a sessão e o cookie no navegador
+export async function createSession(userId: string) {
+  const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 dias de duração
+  const session = await encrypt({ userId, expiresAt });
+
+  const cookieStore = await cookies();
+  
+  cookieStore.set("session", session, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    expires: expiresAt,
+    sameSite: "lax",
+    path: "/",
+  });
+}
+
+// Apaga o cookie (Logout)
+export async function deleteSession() {
+  const cookieStore = await cookies();
+  cookieStore.delete("session");
+}
