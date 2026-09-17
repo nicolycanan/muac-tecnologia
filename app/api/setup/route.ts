@@ -5,8 +5,12 @@ import { eq, and } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { decrypt } from "@/src/lib/session";
 
-export async function PUT(request: NextRequest) {
+export async function PUT(
+  request: NextRequest,
+  context: { params: Promise<{ id?: string }> }
+) {
   try {
+    const routeParams = await context.params;
     const cookieStore = await cookies();
     const sessionCookie = cookieStore.get("session")?.value;
     const session = await decrypt(sessionCookie);
@@ -14,8 +18,10 @@ export async function PUT(request: NextRequest) {
     if (!session?.userId) {
       return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
     }
+
     const body = await request.json();
-    const { id, name, destinationType, destinationUrl } = body;
+    const { id: bodyId, name, destinationType, destinationUrl } = body;
+    const id = routeParams.id || bodyId;
 
     if (typeof id !== "string") {
       return NextResponse.json(
